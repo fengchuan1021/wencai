@@ -1,0 +1,45 @@
+# Deploy to aliyun
+
+trigger:
+- main
+- dev
+resources:
+- repo: self
+
+
+variables:
+  BRANCH_NAME: $[upper(replace(variables['Build.SourceBranch'], 'refs/heads/', ''))]
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'ee5dc520-f784-4261-b6c6-fd1ff960e101'
+  imageRepository: 'xtpython'
+  containerRegistry: 'xtmagento.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: '$(Build.BuildId)'
+  imagePullSecret: 'xtmagento7641d461-auth'
+
+
+  # Agent VM image name???
+  vmImageName: 'ubuntu-latest'
+
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      name: Default
+      vmImage: $(vmImageName)
+    steps:
+    - task: Bash@3
+      inputs:
+        filePath: 'devtools/vm_deploy/deploypython.sh'
+        ${{ if eq(upper(replace(variables['Build.SourceBranch'], 'refs/heads/', '')), 'DEV') }}:
+          arguments: --build-arg MODE="STAGE"
+        ${{ else }}:
+          arguments: --build-arg MODE="MAIN"
+
+        
+
+

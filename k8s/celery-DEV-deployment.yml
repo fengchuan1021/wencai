@@ -1,0 +1,24 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: celery
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: celery
+  template:
+    metadata:
+      labels:
+        app: celery
+    spec:
+      containers:
+        - name: xtpython
+          image: xtmagento.azurecr.io/xtpython
+
+          env:
+            - name: MODE
+              value: STAGE
+            - name: CMD
+              value: CELERY

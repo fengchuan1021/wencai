@@ -1,0 +1,25 @@
+apiVersion : apps/v1
+kind: Deployment
+metadata:
+  name: tmapi
+  namespace: dev
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tmapi
+  template:
+    metadata:
+      labels:
+        app: tmapi 
+    spec:
+      containers:
+        - name: xtpython
+          image: xtmagento.azurecr.io/xtpython
+          ports:
+          - containerPort: 8000
+          env:
+            - name: MODE
+              value: STAGE
+            - name: CMD
+              value: APP

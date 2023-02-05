@@ -1,0 +1,29 @@
+helm upgrade my-ingress bitnami/nginx-ingress-controller --set tcp.3306="default/mymysql-primary-headless:3306" `
+--set tcp.3307="default/mymysql-secondary-headless:3306" `
+--set tcp.5672="default/rabbitmq-1662947536-headless:5672" `
+--set tcp.6379="default/redis-1662980590-master:6379" `
+--set tcp.6380="default/redis-1662980590-replicas:6379" `
+--set tcp.9200="default/my-release-elasticsearch-data-hl:9200" `
+--set tcp.9300="default/my-release-elasticsearch-data-hl:9300"
+
+docker build --build-arg MODE=STAGE -t fengchuanhn/myimage:v3 .
+docker push fengchuanhn/myimage:v3
+
+kubectl create secret docker-registry dockerhub --docker-server=docker.io --docker-username=fengchuanhn --docker-password=Xiaochuan1021 --docker-email=1299693999@qq.com
+kubectl create secret docker-registry dockerhub --docker-server=https://index.docker.io/v1/ --docker-username=fengchuanhn --docker-password=Xiaochuan1021 --docker-email=1299693999@qq.com
+
+kubectl create secret generic regcred --from-file=.dockerconfigjson=C:/Users/fengchuan/.docker/config.json --type=kubernetes.io/dockerconfigjson
+
+
+helm install my-release bitnami/elasticsearch --set global.kibanaEnabled=true
+
+redis-1662980590-master.default.svc.cluster.local for read/write operations (port 6379)
+redis-1662980590-replicas.default.svc.cluster.local for read-only operations (port 6379)
+
+
+
+#install magento
+docker run -d -p 80:80 --name magento -e MYSQL_HOST=rm-bp1k3pm58e4t9f35wso.mysql.rds.aliyuncs.com -e MYSQL_DATABASE=magento -e MYSQL_USER=root -e MYSQL_PASSWORD=Xiaochuan1021 -e MAGENTO_ADMIN_EMAIL=1299693999@qq.com -e MAGENTO_ADMIN_PASSWORD=Xiaochuan1021  alexcheng/magento
+docker run -it --rm -p 80:80 --name magento -e MYSQL_HOST=rm-bp1k3pm58e4t9f35wso.mysql.rds.aliyuncs.com -e MYSQL_DATABASE=magento -e MYSQL_USER=root -e MYSQL_PASSWORD=Xiaochuan1021 -e MAGENTO_ADMIN_EMAIL=1299693999@qq.com -e MAGENTO_ADMIN_PASSWORD=Xiaochuan1021  alexcheng/magento
+
+minikube start --driver=hyperv --kubernetes-version=1.23.10 --cpus=4 --memory=8g --disk-size=60g --hyperv-virtual-switch="bridge"

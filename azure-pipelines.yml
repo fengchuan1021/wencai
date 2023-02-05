@@ -1,0 +1,100 @@
+# Deploy to Azure Kubernetes Service
+# Build and push image to Azure Container Registry; Deploy to Azure Kubernetes Service
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+- main
+- dev
+resources:
+- repo: self
+
+variables:
+  BRANCH_NAME: $[upper(replace(variables['Build.SourceBranch'], 'refs/heads/', ''))]
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'ee5dc520-f784-4261-b6c6-fd1ff960e101'
+  imageRepository: 'xtpython'
+  containerRegistry: 'xtmagento.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: '$(Build.BuildId)'
+  imagePullSecret: 'xtmagento7641d461-auth'
+
+
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      #name: Azure Pipelines
+      vmImage: $(vmImageName)
+    steps:
+    - task: Docker@2
+      displayName: Build
+      inputs:
+        command: build
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        tags: |
+          $(tag)
+        ${{ if eq(upper(replace(variables['Build.SourceBranch'], 'refs/heads/', '')), 'DEV') }}:
+          arguments: --build-arg MODE="STAGE"
+        ${{ else }}:
+          arguments: --build-arg MODE="MAIN"
+
+    - task: Docker@2
+      displayName: Push image
+      inputs:
+        containerRegistry: $(dockerRegistryServiceConnection)
+        repository: $(imageRepository)
+        command: push
+        tags: |
+          $(tag)
+    - task: PublishPipelineArtifact@1
+      inputs:
+        targetPath: '$(Pipeline.Workspace)/s/k8s'
+        artifact: 'manifests'
+        publishLocation: 'pipeline'
+
+
+- stage: Deploy
+  displayName: Deploy stage
+  dependsOn: Build
+
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy
+    pool:
+      #name: Azure Pipelines
+      vmImage: $(vmImageName)
+    environment: 'XTpython.default'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: KubernetesManifest@0
+            displayName: Create imagePullSecret
+            inputs:
+              action: createSecret
+              secretName: $(imagePullSecret)
+              dockerRegistryEndpoint: $(dockerRegistryServiceConnection)
+
+          - task: KubernetesManifest@0
+            displayName: Deploy to Kubernetes cluster
+            inputs:
+              action: deploy
+              #kubernetesServiceConnection: $(k8sname)
+              manifests: |
+                $(Pipeline.Workspace)/manifests/app-$(BRANCH_NAME)-deployment.yml
+                $(Pipeline.Workspace)/manifests/celery-$(BRANCH_NAME)-deployment.yml
+                $(Pipeline.Workspace)/manifests/service.yml
+              imagePullSecrets: |
+                $(imagePullSecret)
+              containers: |
+                $(containerRegistry)/$(imageRepository):$(tag)
+

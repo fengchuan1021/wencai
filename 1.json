@@ -1,0 +1,107 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "xt_python",
+    "description": "",
+    "version": "1.0.0"
+  },
+  "tags": [
+    {
+      "name": "merchant"
+    }
+  ],
+  "paths": {
+    "/merchant/merchantApply": {
+      "post": {
+        "summary": "merchantApply",
+        "x-apifox-folder": "merchant",
+        "x-apifox-status": "developing",
+        "deprecated": false,
+        "description": "",
+        "operationId": "UtilController",
+        "tags": [
+          "merchant"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "header",
+            "description": "",
+            "example": "{{ACCESS_TOKEN}}",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "company_name": {
+                    "type": "string"
+                  },
+                  "contacts_firstname": {
+                    "type": "string"
+                  },
+                  "contacts_tels": {
+                    "type": "string"
+                  },
+                  "merchant_name": {
+                    "type": "string"
+                  },
+                  "company_url": {
+                    "type": "string"
+                  },
+                  "contacts_lastname": {
+                    "type": "string"
+                  },
+                  "contacts_email": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "company_name",
+                  "contacts_firstname",
+                  "contacts_tels",
+                  "merchant_name"
+                ],
+                "x-apifox-orders": [
+                  "company_name",
+                  "contacts_firstname",
+                  "contacts_tels",
+                  "merchant_name",
+                  "company_url",
+                  "contacts_lastname",
+                  "contacts_email"
+                ],
+                "x-apifox-ignore-properties": []
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "成功",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {},
+                  "x-apifox-ignore-properties": [],
+                  "x-apifox-orders": []
+                }
+              }
+            }
+          }
+        },
+        "x-run-in-apifox'": "https://www.apifox.cn/web/project/1978190/apis/api-59542491-run"
+      }
+    }
+  },
+  "components": {
+    "schemas": {}
+  },
+  "servers": []
+}
